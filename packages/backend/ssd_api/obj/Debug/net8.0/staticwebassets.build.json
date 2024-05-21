@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "elsQO5n8zAmRRsKxlnnWYCUQaPg3POGUGTC8zTqLh3o=",
+  "Source": "ssd_api",
+  "BasePath": "_content/ssd_api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
