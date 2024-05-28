@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Core", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Infrastructure", "SecureTeamSimulator.Infrastructure\SecureTeamSimulator.Infrastructure.csproj", "{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Api", "SecureTeamSimulator.Api\SecureTeamSimulator.Api.csproj", "{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Api", "SecureTeamSimulator.Api\SecureTeamSimulator.Api.csproj", "{AA9A361A-E06A-45D9-9478-6D67E52C0FAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,9 +32,9 @@ Global
 		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA9A361A-E06A-45D9-9478-6D67E52C0FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA9A361A-E06A-45D9-9478-6D67E52C0FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA9A361A-E06A-45D9-9478-6D67E52C0FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA9A361A-E06A-45D9-9478-6D67E52C0FAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
