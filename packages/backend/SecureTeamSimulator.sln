@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Application", "SecureTeamSimulator.Application\SecureTeamSimulator.Application.csproj", "{F72F2B57-2524-4E2B-9B2D-903BE02FCADB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Core", "SecureTeamSimulator.Core\SecureTeamSimulator.Core.csproj", "{39FDB11F-0F62-4B61-81C6-EB03342E3471}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Infrastructure", "SecureTeamSimulator.Infrastructure\SecureTeamSimulator.Infrastructure.csproj", "{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecureTeamSimulator.Api", "SecureTeamSimulator.Api\SecureTeamSimulator.Api.csproj", "{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F72F2B57-2524-4E2B-9B2D-903BE02FCADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F72F2B57-2524-4E2B-9B2D-903BE02FCADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F72F2B57-2524-4E2B-9B2D-903BE02FCADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F72F2B57-2524-4E2B-9B2D-903BE02FCADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39FDB11F-0F62-4B61-81C6-EB03342E3471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39FDB11F-0F62-4B61-81C6-EB03342E3471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39FDB11F-0F62-4B61-81C6-EB03342E3471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39FDB11F-0F62-4B61-81C6-EB03342E3471}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CCE8302-0AE5-4AC6-84F4-503A655E74D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77AEBAB9-4CE3-4F4D-8978-20E0BC3F8046}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
