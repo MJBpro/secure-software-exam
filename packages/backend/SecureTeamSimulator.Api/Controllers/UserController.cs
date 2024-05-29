@@ -4,17 +4,21 @@ using SecureTamSimulator.Api.Security.Policies.Roles;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
 using SecureTeamSimulator.Core.Security.Outgoing;
-
 namespace SecureTamSimulator.Api.Controllers
 {
     [Route("user")]
+    [ApiController]
     public class UserController(
         IUserService userService,
         IEncryptionService encryptionService,
         IUserContextService userContextService)
         : Controller
     {
-
+        /// <summary>
+        /// Creates a new user.
+        /// </summary>
+        /// <param name="user">The user to create.</param>
+        /// <returns>A confirmation message.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
@@ -22,11 +26,12 @@ namespace SecureTamSimulator.Api.Controllers
             user.FirstName = encryptionService.Encrypt(user.FirstName);
             user.LastName = encryptionService.Encrypt(user.LastName);
             user.Address = encryptionService.Encrypt(user.Address);
-            string encryptedBirthdate = encryptionService.Encrypt(user.Birthdate); // Using "o" for round-trip format
+            string encryptedBirthdate = encryptionService.Encrypt(user.Birthdate);
 
             // Get Auth0 ID from claims
+            string authId = userContextService.GetAuthId(); // Assuming this method is available
 
-            await userService.AddUser(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, user.AuthId, user.Role);
+            await userService.AddUser(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
 
             return Ok(new
             {
@@ -34,6 +39,10 @@ namespace SecureTamSimulator.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// Gets all users. Only accessible to admins.
+        /// </summary>
+        /// <returns>A list of users.</returns>
         [HttpGet("all")]
         [Authorize(Policy = PolicyRoles.Admin)]
         public List<User> GetUsers()
@@ -50,6 +59,11 @@ namespace SecureTamSimulator.Api.Controllers
             return users;
         }
 
+        /// <summary>
+        /// Gets a user by ID. Accessible to members.
+        /// </summary>
+        /// <param name="id">The user ID.</param>
+        /// <returns>The user with the specified ID.</returns>
         [HttpGet("{id}")]
         [Authorize(Policy = PolicyRoles.Member)]
         public User GetUserById(string id)
@@ -64,6 +78,10 @@ namespace SecureTamSimulator.Api.Controllers
             return user;
         }
 
+        /// <summary>
+        /// Gets the claims of the current user.
+        /// </summary>
+        /// <returns>The claims of the current user.</returns>
         [HttpGet("me")]
         [Authorize]
         public IActionResult GetMyClaims()
