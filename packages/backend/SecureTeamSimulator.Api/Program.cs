@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SecureTamSimulator.Api.Security;
 using SecureTeamSimulator.Application.Services;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Infrastructure.Database;
 using SecureTeamSimulator.Core.Gdpr;
+using SecureTeamSimulator.Core.Security.Outgoing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,7 +82,8 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
-
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
