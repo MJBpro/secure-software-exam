@@ -5,22 +5,12 @@ using SecureTeamSimulator.Infrastructure.Database;
 
 namespace SecureTeamSimulator.Application.Services;
 
-public class UserService : IUserService
+public class UserService(AppDbContext appContext) : IUserService
 {
-
-    private readonly AppDbContext _appContext;
-    private readonly IAesKeyService _aesKeyService;
-
-    public  UserService(AppDbContext appContext, IAesKeyService aesKeyService)
-    {
-        _appContext = appContext;
-        _aesKeyService = aesKeyService;
-    }
-
-    public async Task AddUser(Guid id, string firstName, string lastName, string address, DateTime birthdate)
+    public async Task AddUser(Guid id, string firstName, string lastName, string address, string birthdate)
     {
 
-        await _appContext.TodoItems.AddAsync(new User()
+        await appContext.Users.AddAsync(new User()
         {
             Id = id,
             FirstName = firstName,
@@ -30,16 +20,16 @@ public class UserService : IUserService
             CreatedAt = DateTime.UtcNow,
         });
 
-        await _appContext.SaveChangesAsync();
+        await appContext.SaveChangesAsync();
     }
 
     public List<User> GetUsers()
     {
-        return _appContext.TodoItems.ToList();
+        return appContext.Users.ToList();
     }
 
     public User GetUserById(Guid id)
     {
-        return _appContext.TodoItems.FirstOrDefault(x => x.Id == id);
+        return appContext.Users.FirstOrDefault(x => x.Id == id);
     }
 }
