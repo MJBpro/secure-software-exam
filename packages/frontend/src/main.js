@@ -8,6 +8,8 @@ const app = createApp(App);
 
 app.use(router);
 
+
+
 app.use(
     createAuth0({
         domain: "pbsw.eu.auth0.com",
@@ -17,9 +19,18 @@ app.use(
         },
         cacheLocation: 'localstorage',
         onRedirectCallback: (appState) => {
+            console.log(appState)
             router.push(appState?.targetUrl || '/');
         },
     })
+    
 );
+
+
+
+
+
+
+
 
 app.mount('#app');
