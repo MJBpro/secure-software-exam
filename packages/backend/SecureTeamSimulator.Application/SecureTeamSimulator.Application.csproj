@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SecureTeamSimulator.Core\SecureTeamSimulator.Core.csproj" />
+    <ProjectReference Include="..\SecureTeamSimulator.Infrastructure\SecureTeamSimulator.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
