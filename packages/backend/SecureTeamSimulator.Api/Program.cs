@@ -1,34 +1,38 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using SecureTeamSimulator.Infrastructure.Gdpr;
+using SecureTeamSimulator.Core.Gdpr;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 var domain = builder.Configuration["Auth0:Domain"];
 var audience = builder.Configuration["Auth0:Audience"];
+
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.Authority = domain;
+    options.Audience = audience;
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.Authority = domain;
-        options.Audience = audience;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = domain,
-            ValidateAudience = true,
-            ValidAudience = audience,
-            ValidateLifetime = true
-        };
-    });
+        ValidateIssuer = true,
+        ValidIssuer = domain,
+        ValidateAudience = true,
+        ValidAudience = audience,
+        ValidateLifetime = true
+    };
+});
 
 builder.Services.AddAuthorization();
-
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -42,7 +46,6 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.Http,
         Scheme = "bearer", // Must be lowercase
         BearerFormat = "JWT"
-        
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -63,6 +66,9 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Register AesKeyService with dependency injection
+builder.Services.AddSingleton<IAesKeyService, AesKeyService>();
 
 var app = builder.Build();
 
