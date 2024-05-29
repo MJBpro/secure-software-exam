@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SecureTamSimulator.Api.Security;
+using SecureTamSimulator.Api.Security.Policies.Roles;
+using SecureTamSimulator.Api.Security.Policies.Scopes;
 using SecureTeamSimulator.Application.Services;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Infrastructure.Database;
@@ -44,13 +46,33 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(PolicyScopes.ReadClaims, policy =>
+        policy.Requirements.Add(new ScopeRequirement(PolicyScopes.ReadClaims)));
+    options.AddPolicy(PolicyScopes.WriteSignup, policy =>
+        policy.Requirements.Add(new ScopeRequirement(PolicyScopes.WriteSignup)));
+    options.AddPolicy(PolicyScopes.ReadsUserTermsContext, policy =>
+        policy.Requirements.Add(new ScopeRequirement(PolicyScopes.ReadsUserTermsContext)));
+    options.AddPolicy(PolicyRoles.Admin, policy =>
+        policy.Requirements.Add(new RoleRequirement(new[] { Role.Admin })));
+    options.AddPolicy(PolicyRoles.Member, policy =>
+        policy.Requirements.Add(new RoleRequirement(new[] { Role.Admin, Role.Member })));
+});
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserContextService, UserContextService>();
 
+builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
+builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My Auth0 API", Version = "v1" });
@@ -73,19 +95,15 @@ builder.Services.AddSwaggerGen(c =>
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
-                }
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
             },
-            new[] { "read:messages" }
+            new List<string>()
         }
     });
 });
-
-builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
-builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddScoped<IUserContextService, UserContextService>();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
