@@ -6,7 +6,11 @@ public class User
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Address { get; set; } 
-    public DateTime Birthdate { get; set; } // "RedTeam" or "BlueTeam
+    public string Birthdate { get; set; }  // "RedTeam" or "BlueTeam
     public DateTime CreatedAt { get; set; } 
+    
+    public string AuthId { get; set; }
+    
+    public UserRole Role { get; set; }
 
 }
