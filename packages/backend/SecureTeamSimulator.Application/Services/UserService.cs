@@ -7,12 +7,13 @@ namespace SecureTeamSimulator.Application.Services;
 
 public class UserService(AppDbContext appContext) : IUserService
 {
-    public async Task AddUser(Guid id, string firstName, string lastName, string address, string birthdate)
+    public async Task AddUser(Guid id, string firstName, string lastName, string address, string birthdate, string authId, UserRole role)
     {
 
         await appContext.Users.AddAsync(new User()
         {
             Id = id,
+            AuthId = authId,
             FirstName = firstName,
             LastName = lastName,
             Address = address,

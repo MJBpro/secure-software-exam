@@ -16,9 +16,9 @@ namespace SecureTamSimulator.Api.Controllers
             user.FirstName = encryptionService.Encrypt(user.FirstName);
             user.LastName = encryptionService.Encrypt(user.LastName);
             user.Address = encryptionService.Encrypt(user.Address);
-            string encryptedBirthdate = encryptionService.Encrypt(user.Birthdate.ToString()); // Using "o" for round-trip format
+            var encryptedBirthdate = encryptionService.Encrypt(user.Birthdate.ToString()); // Using "o" for round-trip format
 
-            await userService.AddUser(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate);
+            await userService.AddUser(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, user.AuthId,  user.Role);
 
             return Ok(new
             {
@@ -26,7 +26,7 @@ namespace SecureTamSimulator.Api.Controllers
             });
         }
 
-
+        
         [HttpGet("all")]
         public List<User> GetUsers()
         {
@@ -51,7 +51,7 @@ namespace SecureTamSimulator.Api.Controllers
             user.LastName = encryptionService.Decrypt(user.LastName);
             user.Address = encryptionService.Decrypt(user.Address);
             user.Birthdate = encryptionService.Decrypt(user.Birthdate);
-
+            
             return user;
         }
     }

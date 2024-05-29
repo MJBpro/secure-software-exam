@@ -10,5 +10,7 @@ public class User
     public DateTime CreatedAt { get; set; } 
     
     public string AuthId { get; set; }
+    
+    public UserRole Role { get; set; }
 
 }
