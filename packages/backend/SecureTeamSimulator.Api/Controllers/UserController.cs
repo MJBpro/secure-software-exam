@@ -29,7 +29,7 @@ namespace SecureTamSimulator.Api.Controllers
             // Get Auth0 ID from claims
             string authId = userContextService.GetAuthId(); // Assuming this method is available
 
-            await userService.AddUser(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
+            await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
 
             return Ok(new
             {
@@ -43,9 +43,9 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>A list of users.</returns>
         [HttpGet("all")]
         [Authorize(Policy = PolicyRoles.Admin)]
-        public List<User> GetUsers()
+        public async Task<IEnumerable<User>> GetUsers()
         {
-            var users = userService.GetUsers();
+            var users = await userService.GetAllUsersAsync();
             return users;
         }
 
@@ -56,9 +56,9 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>The user with the specified ID.</returns>
         [HttpGet("{id}")]
         [Authorize(Policy = PolicyRoles.Member)]
-        public User GetUserById(string id)
+        public async Task<User> GetUserById(string id)
         {
-            var user = userService.GetUserById(Guid.Parse(id));
+            var user = await userService.GetUserByIdAsync(Guid.Parse(id));
             // Decrypt sensitive user data
            
             user.Address = encryptionService.Decrypt(user.Address);
@@ -82,6 +82,23 @@ namespace SecureTamSimulator.Api.Controllers
             }).ToList();
 
             return Ok(claims);
+        }
+        /// <summary>
+        /// Deletes a user by ID.
+        /// </summary>
+        /// <param name="id">The user ID.</param>
+        /// <returns>A confirmation message.</returns>
+        [HttpDelete("{id}")]
+        [Authorize(Policy = PolicyRoles.Admin)]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user = await userService.GetUserByIdAsync(Guid.Parse(id));
+            if (user == null)
+            {
+                return NotFound();
+            }
+            await userService.DeleteUserAsync(Guid.Parse(id));
+            return NoContent();
         }
     }
 }
