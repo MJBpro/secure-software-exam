@@ -14,10 +14,11 @@ import { useAuth0 } from "@auth0/auth0-vue";
 var auth = useAuth0()
 
 
+
+
 async function login(){
 
     await auth.loginWithRedirect();
-
 
 
 }

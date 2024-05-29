@@ -23,16 +23,20 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to) =>{
+router.beforeEach(async (to) =>{
   
   if(!useAuth0().isAuthenticated.value && to.name !== 'Login'){
     // redirect the user to the login page
     return { name: 'Login' }
   }
 
-  console.log(useAuth0().isAuthenticated.value, to.name)
+  
 
   if((useAuth0().isAuthenticated.value && to.name == 'Login')){
+    await setTimeout(() => {
+
+    }, 1000);
+
     return { name: 'HomePage' }
   }
 

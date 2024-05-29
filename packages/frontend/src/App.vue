@@ -1,10 +1,9 @@
 <template>
-  <div>
+  <div class="h-full " style="padding: auto">
 
 
-    <div >
-      <router-view />
-    </div>
+  
+      <router-view class="h-full" />
   </div>
 </template>
 
@@ -13,6 +12,9 @@
 </script>
 
 <style>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 body{
   padding: 0;
   margin: 0;
