@@ -1,41 +1,31 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="h-full " style="padding: auto">
 
-  <button class="login-button" @click="login">Log in</button>
 
+  
+      <router-view class="h-full" />
+  </div>
 </template>
 
-<script>
-import {useAuth0} from '@auth0/auth0-vue';
-import HelloWorld from './components/HelloWorld.vue'
+<script setup >
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld,
-  },
-
-  setup() {
-    const {loginWithRedirect} = useAuth0();
-
-    return {
-      login: () => {
-        loginWithRedirect();
-      }
-    };
-  }
-}
 </script>
 
 <style>
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body{
+  padding: 0;
+  margin: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  padding: 0px;
 }
 
 .login-button {
