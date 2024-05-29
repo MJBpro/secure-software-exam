@@ -1,20 +1,16 @@
-const CallbackPage = () => import("@/pages/callback-page.vue");
-import { createRouter, createWebHistory } from "vue-router";
-
+// src/router/index.js
+import { createRouter, createWebHistory } from 'vue-router';
+import HomePage from '../pages/HomePage.vue';
+import CallbackPage from '../pages/callback-page.vue';
 
 const routes = [
-
-    {
-        path: "/callback",
-        name: "callback",
-        component: CallbackPage,
-    }
+  { path: '/', component: HomePage },
+  { path: '/callback', component: CallbackPage }
 ];
 
-
-const router= createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes,
-})
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+});
 
 export default router;

@@ -1,0 +1,7 @@
+{
+  "domain": "pbsw.eu.auth0.com",
+  "clientId": "B8Wl4W10gRdaldhiH03BDkfWl3EO9WAR",
+  "authorizationParams": {
+    "audience": "https://localhost:7206"
+  }
+}
