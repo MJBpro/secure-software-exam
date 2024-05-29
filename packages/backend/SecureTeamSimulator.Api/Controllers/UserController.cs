@@ -22,9 +22,7 @@ namespace SecureTamSimulator.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
-            // Encrypt sensitive user data
-            user.FirstName = encryptionService.Encrypt(user.FirstName);
-            user.LastName = encryptionService.Encrypt(user.LastName);
+        
             user.Address = encryptionService.Encrypt(user.Address);
             string encryptedBirthdate = encryptionService.Encrypt(user.Birthdate);
 
@@ -48,14 +46,6 @@ namespace SecureTamSimulator.Api.Controllers
         public List<User> GetUsers()
         {
             var users = userService.GetUsers();
-            // Decrypt sensitive user data
-            foreach (var user in users)
-            {
-                user.FirstName = encryptionService.Decrypt(user.FirstName);
-                user.LastName = encryptionService.Decrypt(user.LastName);
-                user.Address = encryptionService.Decrypt(user.Address);
-                user.Birthdate = encryptionService.Decrypt(user.Birthdate);
-            }
             return users;
         }
 
@@ -70,8 +60,7 @@ namespace SecureTamSimulator.Api.Controllers
         {
             var user = userService.GetUserById(Guid.Parse(id));
             // Decrypt sensitive user data
-            user.FirstName = encryptionService.Decrypt(user.FirstName);
-            user.LastName = encryptionService.Decrypt(user.LastName);
+           
             user.Address = encryptionService.Decrypt(user.Address);
             user.Birthdate = encryptionService.Decrypt(user.Birthdate);
 
