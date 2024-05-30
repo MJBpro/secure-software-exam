@@ -100,5 +100,24 @@ namespace SecureTamSimulator.Api.Controllers
             await userService.DeleteUserAsync(Guid.Parse(id));
             return NoContent();
         }
+        /// <summary>
+        /// Searches users by a term.
+        /// </summary>
+        /// <param name="searchTerm">The search term.</param>
+        /// <returns>A list of users that match the search criteria.</returns>
+        [HttpGet("search")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<User>>> SearchUsers(string searchTerm)
+        {
+            var users = await userService.SearchUsersAsync(searchTerm);
+            // Decrypt sensitive user data
+            foreach (var user in users)
+            {
+                user.FirstName = encryptionService.Decrypt(user.FirstName);
+                user.LastName = encryptionService.Decrypt(user.LastName);
+                user.Address = encryptionService.Decrypt(user.Address);
+            }
+            return Ok(users);
+        }
     }
 }

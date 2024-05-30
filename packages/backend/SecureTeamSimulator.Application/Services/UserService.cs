@@ -70,5 +70,20 @@ namespace SecureTeamSimulator.Application.Services
                 await _appContext.SaveChangesAsync();
             }
         }
+        public async Task<IEnumerable<User>> SearchUsersAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return Enumerable.Empty<User>();
+            }
+
+            searchTerm = searchTerm.ToLower();
+            return await _appContext.Users
+                .Where(user => user.FirstName.ToLower().Contains(searchTerm) ||
+                               user.LastName.ToLower().Contains(searchTerm) ||
+                               user.Address.ToLower().Contains(searchTerm) ||
+                               user.AuthId.ToLower().Contains(searchTerm))
+                .ToListAsync();
+        }
     }
 }
