@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SecureTamSimulator.Api.Security.Policies.Roles;
+using SecureTeamSimulator.Application.DTOs;
 using SecureTeamSimulator.Application.Helpers;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
@@ -19,11 +20,11 @@ namespace SecureTamSimulator.Api.Controllers
         /// <summary>
         /// Creates a new user.
         /// </summary>
-        /// <param name="user">The user to create.</param>
+        /// <param name="createUserDto"></param>
         /// <returns>A confirmation message.</returns>
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> CreateUser([FromBody] User user)
+        public async Task<IActionResult> CreateUser([FromBody] CreateUserDto createUserDto)
         {
             // Get Auth0 ID and email from claims
             var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
@@ -41,12 +42,12 @@ namespace SecureTamSimulator.Api.Controllers
             var encryptionIV = HashHelper.GenerateIV(authId, email);
 
             // Encrypt sensitive user data
-            user.Address = encryptionService.Encrypt(user.Address, encryptionKey, encryptionIV);
-            var encryptedBirthdate = encryptionService.Encrypt(user.Birthdate, encryptionKey, encryptionIV);
-
+            createUserDto.Address = encryptionService.Encrypt(createUserDto.Address, encryptionKey, encryptionIV);
+            var encryptedBirthdate = encryptionService.Encrypt(createUserDto.BirthDate, encryptionKey, encryptionIV);
+            var encryptedEmail = encryptionService.Encrypt(email, encryptionKey, encryptionIV);
             // Add user
-            await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role, encryptionKey, encryptionIV);
-            var roleId = GetRoleIdBasedOnEnum(user.Role); 
+            await userService.AddUserAsync(Guid.NewGuid(), createUserDto.FirstName, createUserDto.LastName, createUserDto.Address, encryptedBirthdate, authId, UserRole.Member, encryptionKey, encryptionIV, encryptedEmail);
+            var roleId = GetRoleIdBasedOnEnum(UserRole.Member); 
             await auth0ManagementService.AssignRoleToUserAsync(authId, roleId);
             return Ok(new
             {
@@ -68,7 +69,7 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>A list of users.</returns>
         [HttpGet("all")]
         [Authorize(Policy = PolicyRoles.Admin)]
-        public async Task<IEnumerable<User?>> GetUsers()
+        public async Task<IEnumerable<GetUserDto?>> GetUsers()
         {
             var users = await userService.GetAllUsersAsync();
             return users;
@@ -83,32 +84,14 @@ namespace SecureTamSimulator.Api.Controllers
         [Authorize(Policy = PolicyRoles.Member)]
         public async Task<IActionResult> GetUserById(string authId)
         {
-            var user = await userService.GetUserByIdAsync(authId);
-            if (user == null)
+            var userDto = await userService.GetUserByIdAsync(authId);
+            if (userDto == null)
             {
                 return NotFound(); // Return 404 if the user is not found
             }
+            
 
-            // Check if EncryptionKey and EncryptionIV are not null
-            if (string.IsNullOrEmpty(user.EncryptionKey) || string.IsNullOrEmpty(user.EncryptionIV))
-            {
-                return StatusCode(500, "User encryption data is missing."); // Return 500 if encryption data is missing
-            }
-
-            // Decrypt sensitive user data
-            try
-            {
-                var encryptionKey = user.EncryptionKey;
-                var encryptionIV = user.EncryptionIV;
-                user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
-                user.Birthdate = encryptionService.Decrypt(user.Birthdate, encryptionKey, encryptionIV);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error decrypting user data: {ex.Message}"); // Return 500 if decryption fails
-            }
-
-            return Ok(user); // Return 200 with the user data
+            return Ok(userDto); // Return 200 with the user data
         }
 
         /// <summary>
@@ -152,7 +135,7 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>A list of users that match the search criteria.</returns>
         [HttpGet("search")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<User>>> SearchUsers(string searchTerm)
+        public async Task<IActionResult> SearchUsers(string searchTerm)
         {
             var users = await userService.SearchUsersAsync(searchTerm);
             if (users.IsNullOrEmpty())
