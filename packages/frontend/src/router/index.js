@@ -2,6 +2,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '../pages/HomePage.vue';
 import LoginPage from '../pages/LoginPage.vue';
+import UserProfilePage from '../pages/UserProfilePage.vue';
 
 import {  useAuth0 } from '@auth0/auth0-vue';
 
@@ -18,6 +19,11 @@ const router = createRouter({
       path: "/login",
       component: LoginPage,
       name: "Login"
+    },
+    { 
+      path: "/profile",
+      component: UserProfilePage,
+      name: "Profile"
     }
 
   ],
@@ -30,13 +36,9 @@ router.beforeEach(async (to) =>{
     return { name: 'Login' }
   }
 
-  
+
 
   if((useAuth0().isAuthenticated.value && to.name == 'Login')){
-    await setTimeout(() => {
-
-    }, 1000);
-
     return { name: 'HomePage' }
   }
 

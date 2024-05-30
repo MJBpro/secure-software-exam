@@ -124,6 +124,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors((cors) =>
+{
+    cors.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

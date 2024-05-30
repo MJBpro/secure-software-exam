@@ -1,46 +1,55 @@
 <template>
-  <div class="home h-full">
+  <div v-if="!loading" class="home h-full">
     <NavBar />
-  <div class="flex h-full mt-24 justify-center">
+    <div class="flex h-full mt-24 justify-center">
 
-    <UserInformationPage v-if="!user" />
-</div>
+      <CreateUserPage   />
+   </div>
 
-    <button @click="logout">Logout</button>
-    {{auth.isAuthenticated}}
+
+  </div>
+
+  <div v-else>
+        loading...
   </div>
 </template>
 
 <script setup>
 import { useAuth0 } from "@auth0/auth0-vue";
 import NavBar from "@/components/NavBar.vue";
-import UserInformationPage from "@/pages/UserInformationPage.vue";
-
+import CreateUserPage from "@/pages/CreateUserPage.vue";
 import { onMounted, ref } from "vue";
+import { useUserService} from '../services/userService';
+import { useRouter } from "vue-router";
 
 
-
+var userService = useUserService()
+var router = useRouter()
 var user = ref()
 
-async function getUser(){
-    var userId = auth.user.value?.sub;
-    
-    await setTimeout(() => {
-      console.log(userId)
-        return userId
-    }, 1000);
-}
+
+const loading = ref(false)
+
+
+
+
   var auth = useAuth0()
 
-  async function logout(){
-    await auth.logout({openUrl: false}).then(()=>{
-      window.location.reload()
-    })
-  }
+ 
 
   onMounted(async ()=>{
-   user.value = await getUser()
-
+      loading.value = true
+      await userService.getUser(auth.user.value?.sub)
+      .then((res)=>{
+        user.value = res
+        router.push({name:"Profile"})
+      })
+      .catch((err)=>{
+        console.log("err",err)
+      })
+        
+   
+  loading.value = false
   })
 </script>
 

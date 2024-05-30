@@ -1,9 +1,6 @@
 <template>
-  <div class="h-full " style="padding: auto">
-
-
-  
-      <router-view class="h-full" />
+  <div>
+      <router-view  />
   </div>
 </template>
 

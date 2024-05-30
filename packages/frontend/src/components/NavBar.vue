@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar">
+    <div    class="navbar">
 
         <div class="flex items-center gap-2" style="" >
             <div >
@@ -19,20 +19,38 @@
             </div>
             <h2 class="text-lg mt-2 font-medium">SecureTeamSimulator</h2>
         </div>
-        <div style="margin-left:auto; display: flex; align-items:center; gap: 20px">
+       
+       
+       
+        <div @click="()=>showLogout = true " style="margin-left:auto; display: flex; align-items:center; gap: 20px">
             <h4>{{user.name}}</h4>
             <img :src="user.picture" class="avatar"/>
         </div>
+
+        <div v-if="showLogout" class=" rounded-lg p-2 absolute right-4 mt-28 bg-white shadow-md">
+               <button class="px-3 py-2 rounded-lg hover:bg-red-300" @click="logout">Logout</button> 
+        </div>
+
+
 
     </div>
 </template>
 
 <script setup>
 import { useAuth0 } from "@auth0/auth0-vue";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 var auth = useAuth0()
 var user = computed(()=> auth.user.value)
+const showLogout = ref(false)
+
+ async function logout(){
+    await auth.logout({openUrl: false}).then(()=>{
+      window.location.reload()
+    })
+  }
+
+
 
 </script>
 <style scoped>
@@ -42,7 +60,7 @@ var user = computed(()=> auth.user.value)
     width: auto;
     height: 4rem;
     background: rgb(217, 222, 239);
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 6px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 1px 2px;
     padding: 1rem;
     }
 
