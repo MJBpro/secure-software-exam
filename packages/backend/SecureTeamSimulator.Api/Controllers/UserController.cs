@@ -27,8 +27,8 @@ namespace SecureTamSimulator.Api.Controllers
         {
             // Get Auth0 ID and email from claims
             var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
-            string authId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            string email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var authId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
             if (authId == null)
                 return BadRequest("Auth ID not found in claims");
@@ -46,8 +46,7 @@ namespace SecureTamSimulator.Api.Controllers
 
             // Add user
             await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
-            // Assign role to user in Auth0
-            string roleId = GetRoleIdBasedOnEnum(user.Role); // Map your enum to Auth0 role ID
+            var roleId = GetRoleIdBasedOnEnum(user.Role); 
             await auth0ManagementService.AssignRoleToUserAsync(authId, roleId);
             return Ok(new
             {
@@ -56,16 +55,12 @@ namespace SecureTamSimulator.Api.Controllers
         }
         private string GetRoleIdBasedOnEnum(UserRole role)
         {
-            // Map your enum to Auth0 role ID
-            switch (role)
+            return role switch
             {
-                case UserRole.Admin:
-                    return "rol_wWuM2wqzpt3m2bw7";
-                case UserRole.Member:
-                    return "rol_wUY0TxFsacB4iyex";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(role), role, null);
-            }
+                UserRole.Admin => "rol_wWuM2wqzpt3m2bw7",
+                UserRole.Member => "rol_wUY0TxFsacB4iyex",
+                _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+            };
         }
         /// <summary>
         /// Gets all users. Only accessible to admins.

@@ -14,7 +14,6 @@ using SecureTeamSimulator.Core.Security.Outgoing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var domain = builder.Configuration["Auth0:Domain"];
 var audience = builder.Configuration["Auth0:Audience"];
 var managementToken = builder.Configuration["Auth0:ManagementApiToken"];
@@ -30,7 +29,6 @@ builder.Services.AddAuthentication(options =>
     options.Authority = domain;
     options.Audience = audience;
     
-    // Conditionally disable HTTPS metadata requirement in development
     if (builder.Environment.IsDevelopment())
     {
         options.RequireHttpsMetadata = false;
@@ -76,7 +74,6 @@ builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection(
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-// Register Auth0ManagementService with the IAuth0ManagementService interface
 builder.Services.AddSingleton<IAuth0ManagementService>(provider =>
 {
     var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
@@ -118,7 +115,6 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
