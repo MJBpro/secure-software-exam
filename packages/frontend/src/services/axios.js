@@ -19,10 +19,9 @@ apiClient.interceptors.request.use(async request => {
   
 
     if(!authService?.isAuthenticated){
-        console.log("WARNING FIX - login again", authService);
+      await authService.loginWithRedirect();
     }
     
-    console.log("WARNING FIX - login again", authService.idTokenClaims.value.__raw);
     const token =  authService.idTokenClaims.value.__raw
 
   return new Promise( function (resolve /*, reject*/) {

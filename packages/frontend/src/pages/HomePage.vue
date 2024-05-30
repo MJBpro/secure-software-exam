@@ -2,7 +2,7 @@
   <div v-if="!loading" class="home h-full">
     <NavBar />
     <div class="flex h-full mt-24 justify-center">
-
+        
       <CreateUserPage   />
    </div>
 
