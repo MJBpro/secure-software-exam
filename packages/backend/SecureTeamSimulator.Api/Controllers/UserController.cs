@@ -77,13 +77,13 @@ namespace SecureTamSimulator.Api.Controllers
         /// <summary>
         /// Gets a user by ID. Accessible to members.
         /// </summary>
-        /// <param name="id">The user ID.</param>
+        /// <param name="authId"></param>
         /// <returns>The user with the specified ID.</returns>
-        [HttpGet("{id:guid}")]
+        [HttpGet("{authId}")]
         [Authorize(Policy = PolicyRoles.Member)]
-        public async Task<IActionResult> GetUserById(Guid id)
+        public async Task<IActionResult> GetUserById(string authId)
         {
-            var user = await userService.GetUserByIdAsync(id);
+            var user = await userService.GetUserByIdAsync(authId);
             if (user == null)
             {
                 return NotFound(); // Return 404 if the user is not found
@@ -127,21 +127,22 @@ namespace SecureTamSimulator.Api.Controllers
 
             return Ok(claims);
         }
+
         /// <summary>
         /// Deletes a user by ID.
         /// </summary>
-        /// <param name="id">The user ID.</param>
+        /// <param name="authId"></param>
         /// <returns>A confirmation message.</returns>
-        [HttpDelete("{id}")]
+        [HttpDelete("{authId}")]
         [Authorize(Policy = PolicyRoles.Admin)]
-        public async Task<IActionResult> DeleteUser(string id)
+        public async Task<IActionResult> DeleteUser(string authId)
         {
-            var user = await userService.GetUserByIdAsync(Guid.Parse(id));
+            var user = await userService.GetUserByIdAsync(authId);
             if (user == null)
             {
                 return NotFound();
             }
-            await userService.DeleteUserAsync(Guid.Parse(id));
+            await userService.DeleteUserAsync(authId);
             return NoContent();
         }
         /// <summary>

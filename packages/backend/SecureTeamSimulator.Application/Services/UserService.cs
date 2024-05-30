@@ -2,7 +2,6 @@ using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
 using SecureTeamSimulator.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using SecureTeamSimulator.Application.Helpers;
 
 namespace SecureTeamSimulator.Application.Services
 {
@@ -34,14 +33,14 @@ namespace SecureTeamSimulator.Application.Services
             return await appContext.Users.ToListAsync();
         }
 
-        public async Task<User?> GetUserByIdAsync(Guid id)
+        public async Task<User?> GetUserByIdAsync(string authId)
         {
-            return await appContext.Users.FirstOrDefaultAsync(x => x != null && x.Id == id);
+            return await appContext.Users.FirstOrDefaultAsync(x => x != null && x.AuthId == authId);
         }
 
-        public async Task DeleteUserAsync(Guid id)
+        public async Task DeleteUserAsync(string authId)
         {
-            var user = await appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var user = await appContext.Users.FirstOrDefaultAsync(x => x != null && x.AuthId == authId);
             if (user != null)
             {
                 appContext.Users.Remove(user);
