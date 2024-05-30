@@ -8,10 +8,9 @@ namespace SecureTeamSimulator.Application.Services
 {
     public class UserService(AppDbContext appContext) : IUserService
     {
-        public async Task AddUserAsync(Guid id, string firstName, string lastName, string address, string birthdate, string authId, UserRole role)
+        public async Task AddUserAsync(Guid id, string firstName, string lastName, string address, string birthdate, string authId, UserRole role, string key, string iv)
         {
-            var encryptionKey = HashHelper.GenerateKey(authId, firstName);
-            var encryptionIV = HashHelper.GenerateIV(authId, firstName);
+           
 
             await appContext.Users.AddAsync(new User()
             {
@@ -23,21 +22,21 @@ namespace SecureTeamSimulator.Application.Services
                 Birthdate = birthdate,
                 CreatedAt = DateTime.UtcNow,
                 Role = role,
-                EncryptionKey = encryptionKey,
-                EncryptionIV = encryptionIV
+                EncryptionKey = key,
+                EncryptionIV = iv
             });
 
             await appContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IEnumerable<User?>> GetAllUsersAsync()
         {
             return await appContext.Users.ToListAsync();
         }
 
-        public async Task<User> GetUserByIdAsync(Guid id)
+        public async Task<User?> GetUserByIdAsync(Guid id)
         {
-            return await appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await appContext.Users.FirstOrDefaultAsync(x => x != null && x.Id == id);
         }
 
         public async Task DeleteUserAsync(Guid id)
@@ -66,7 +65,7 @@ namespace SecureTeamSimulator.Application.Services
             }
         }
 
-        public async Task<IEnumerable<User>> SearchUsersAsync(string searchTerm)
+        public async Task<IEnumerable<User?>> SearchUsersAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {

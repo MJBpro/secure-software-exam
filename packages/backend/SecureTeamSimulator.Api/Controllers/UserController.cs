@@ -1,11 +1,11 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SecureTamSimulator.Api.Security.Policies.Roles;
 using SecureTeamSimulator.Application.Helpers;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
-using SecureTeamSimulator.Core.Security.Outgoing;
 namespace SecureTamSimulator.Api.Controllers
 {
     [Route("user")]
@@ -45,7 +45,7 @@ namespace SecureTamSimulator.Api.Controllers
             var encryptedBirthdate = encryptionService.Encrypt(user.Birthdate, encryptionKey, encryptionIV);
 
             // Add user
-            await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
+            await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role, encryptionKey, encryptionIV);
             var roleId = GetRoleIdBasedOnEnum(user.Role); 
             await auth0ManagementService.AssignRoleToUserAsync(authId, roleId);
             return Ok(new
@@ -68,7 +68,7 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>A list of users.</returns>
         [HttpGet("all")]
         [Authorize(Policy = PolicyRoles.Admin)]
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<IEnumerable<User?>> GetUsers()
         {
             var users = await userService.GetAllUsersAsync();
             return users;
@@ -79,18 +79,36 @@ namespace SecureTamSimulator.Api.Controllers
         /// </summary>
         /// <param name="id">The user ID.</param>
         /// <returns>The user with the specified ID.</returns>
-        [HttpGet("{id}")]
+        [HttpGet("{id:guid}")]
         [Authorize(Policy = PolicyRoles.Member)]
-        public async Task<User> GetUserById(Guid id)
+        public async Task<IActionResult> GetUserById(Guid id)
         {
             var user = await userService.GetUserByIdAsync(id);
-            // Decrypt sensitive user data
-            var encryptionKey = user.EncryptionKey;
-            var encryptionIV = user.EncryptionIV;
-            user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
-            user.Birthdate = encryptionService.Decrypt(user.Birthdate, encryptionKey, encryptionIV);
+            if (user == null)
+            {
+                return NotFound(); // Return 404 if the user is not found
+            }
 
-            return user;
+            // Check if EncryptionKey and EncryptionIV are not null
+            if (string.IsNullOrEmpty(user.EncryptionKey) || string.IsNullOrEmpty(user.EncryptionIV))
+            {
+                return StatusCode(500, "User encryption data is missing."); // Return 500 if encryption data is missing
+            }
+
+            // Decrypt sensitive user data
+            try
+            {
+                var encryptionKey = user.EncryptionKey;
+                var encryptionIV = user.EncryptionIV;
+                user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
+                user.Birthdate = encryptionService.Decrypt(user.Birthdate, encryptionKey, encryptionIV);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error decrypting user data: {ex.Message}"); // Return 500 if decryption fails
+            }
+
+            return Ok(user); // Return 200 with the user data
         }
 
         /// <summary>
@@ -136,14 +154,9 @@ namespace SecureTamSimulator.Api.Controllers
         public async Task<ActionResult<IEnumerable<User>>> SearchUsers(string searchTerm)
         {
             var users = await userService.SearchUsersAsync(searchTerm);
-            // Decrypt sensitive user data
-            foreach (var user in users)
+            if (users.IsNullOrEmpty())
             {
-                var encryptionKey = user.EncryptionKey;
-                var encryptionIV = user.EncryptionIV;
-                user.FirstName = encryptionService.Decrypt(user.FirstName, encryptionKey, encryptionIV);
-                user.LastName = encryptionService.Decrypt(user.LastName, encryptionKey, encryptionIV);
-                user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
+                return NotFound();
             }
             return Ok(users);
         }

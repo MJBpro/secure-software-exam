@@ -54,10 +54,11 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new ScopeRequirement(PolicyScopes.ReadsUserTermsContext)));
 
     options.AddPolicy(PolicyRoles.Admin, policy =>
-        policy.Requirements.Add(new RoleRequirement(new[] { "Admin", "Member" })));
+        policy.Requirements.Add(new RoleRequirement(new[] { "Admin" })));
     options.AddPolicy(PolicyRoles.Member, policy =>
         policy.Requirements.Add(new RoleRequirement(new[] { "Member" })));
 });
+
 
 builder.Services.AddHttpClient();
 
