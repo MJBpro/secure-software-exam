@@ -2,21 +2,20 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace SecureTamSimulator.Api.Security.Policies.Roles;
 
-public class RoleHandler(IConfiguration configuration) : AuthorizationHandler<RoleRequirement>
+public class RoleHandler : AuthorizationHandler<RoleRequirement>
 {
-    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement roleRequirement)
+    protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RoleRequirement requirement)
     {
-        
-        var organizationRole = context.User.Claims
-            .FirstOrDefault(c => c.Type.EndsWith("/organization_role"))?.Value;
-        
-        if (organizationRole != null && roleRequirement.Roles.Contains(organizationRole.ToLower()))
+        var userRoles = context.User.Claims
+            .Where(c => c.Type == "http://localhost:8082/roles") // Use your namespace
+            .Select(c => c.Value)
+            .ToList();
+
+        if (userRoles.Any(role => requirement.AllowedRoles.Contains(role)))
         {
-            context.Succeed(roleRequirement);
-            return Task.CompletedTask;
+            context.Succeed(requirement);
         }
 
-        context.Fail(new AuthorizationFailureReason(this, "User is not Authorized for this action"));
         return Task.CompletedTask;
     }
 }

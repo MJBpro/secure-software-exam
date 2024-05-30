@@ -1,26 +1,19 @@
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
 using SecureTeamSimulator.Infrastructure.Database;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using SecureTeamSimulator.Application.Helpers;
 
 namespace SecureTeamSimulator.Application.Services
 {
-    public class UserService : IUserService
+    public class UserService(AppDbContext appContext) : IUserService
     {
-        private readonly AppDbContext _appContext;
-
-        public UserService(AppDbContext appContext)
-        {
-            _appContext = appContext;
-        }
-
         public async Task AddUserAsync(Guid id, string firstName, string lastName, string address, string birthdate, string authId, UserRole role)
         {
-            await _appContext.Users.AddAsync(new User()
+            var encryptionKey = HashHelper.GenerateKey(authId, firstName);
+            var encryptionIV = HashHelper.GenerateIV(authId, firstName);
+
+            await appContext.Users.AddAsync(new User()
             {
                 Id = id,
                 AuthId = authId,
@@ -29,35 +22,37 @@ namespace SecureTeamSimulator.Application.Services
                 Address = address,
                 Birthdate = birthdate,
                 CreatedAt = DateTime.UtcNow,
-                Role = role
+                Role = role,
+                EncryptionKey = encryptionKey,
+                EncryptionIV = encryptionIV
             });
 
-            await _appContext.SaveChangesAsync();
+            await appContext.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await _appContext.Users.ToListAsync();
+            return await appContext.Users.ToListAsync();
         }
 
         public async Task<User> GetUserByIdAsync(Guid id)
         {
-            return await _appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            return await appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task DeleteUserAsync(Guid id)
         {
-            var user = await _appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+            var user = await appContext.Users.FirstOrDefaultAsync(x => x.Id == id);
             if (user != null)
             {
-                _appContext.Users.Remove(user);
-                await _appContext.SaveChangesAsync();
+                appContext.Users.Remove(user);
+                await appContext.SaveChangesAsync();
             }
         }
 
         public async Task UpdateUserAsync(User user)
         {
-            var existingUser = await _appContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
+            var existingUser = await appContext.Users.FirstOrDefaultAsync(x => x.Id == user.Id);
             if (existingUser != null)
             {
                 existingUser.FirstName = user.FirstName;
@@ -66,10 +61,11 @@ namespace SecureTeamSimulator.Application.Services
                 existingUser.Birthdate = user.Birthdate;
                 existingUser.Role = user.Role;
 
-                _appContext.Users.Update(existingUser);
-                await _appContext.SaveChangesAsync();
+                appContext.Users.Update(existingUser);
+                await appContext.SaveChangesAsync();
             }
         }
+
         public async Task<IEnumerable<User>> SearchUsersAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -78,7 +74,7 @@ namespace SecureTeamSimulator.Application.Services
             }
 
             searchTerm = searchTerm.ToLower();
-            return await _appContext.Users
+            return await appContext.Users
                 .Where(user => user.FirstName.ToLower().Contains(searchTerm) ||
                                user.LastName.ToLower().Contains(searchTerm) ||
                                user.Address.ToLower().Contains(searchTerm) ||

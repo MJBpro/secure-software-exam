@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SecureTamSimulator.Api.Security.Policies.Roles;
+using SecureTeamSimulator.Application.Helpers;
 using SecureTeamSimulator.Application.Services.Interfaces;
 using SecureTeamSimulator.Core.Entities;
 using SecureTeamSimulator.Core.Security.Outgoing;
@@ -11,7 +13,7 @@ namespace SecureTamSimulator.Api.Controllers
     public class UserController(
         IUserService userService,
         IEncryptionService encryptionService,
-        IUserContextService userContextService)
+        IAuth0ManagementService auth0ManagementService)
         : Controller
     {
         /// <summary>
@@ -20,23 +22,51 @@ namespace SecureTamSimulator.Api.Controllers
         /// <param name="user">The user to create.</param>
         /// <returns>A confirmation message.</returns>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateUser([FromBody] User user)
         {
-        
-            user.Address = encryptionService.Encrypt(user.Address);
-            string encryptedBirthdate = encryptionService.Encrypt(user.Birthdate);
+            // Get Auth0 ID and email from claims
+            var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            string authId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            string email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
 
-            // Get Auth0 ID from claims
-            string authId = userContextService.GetAuthId(); // Assuming this method is available
+            if (authId == null)
+                return BadRequest("Auth ID not found in claims");
 
+            if (email == null)
+                return BadRequest("Email not found in claims");
+
+            // Generate encryption key and IV
+            var encryptionKey = HashHelper.GenerateKey(authId, email);
+            var encryptionIV = HashHelper.GenerateIV(authId, email);
+
+            // Encrypt sensitive user data
+            user.Address = encryptionService.Encrypt(user.Address, encryptionKey, encryptionIV);
+            var encryptedBirthdate = encryptionService.Encrypt(user.Birthdate, encryptionKey, encryptionIV);
+
+            // Add user
             await userService.AddUserAsync(Guid.NewGuid(), user.FirstName, user.LastName, user.Address, encryptedBirthdate, authId, user.Role);
-
+            // Assign role to user in Auth0
+            string roleId = GetRoleIdBasedOnEnum(user.Role); // Map your enum to Auth0 role ID
+            await auth0ManagementService.AssignRoleToUserAsync(authId, roleId);
             return Ok(new
             {
                 Message = "User was added!"
             });
         }
-
+        private string GetRoleIdBasedOnEnum(UserRole role)
+        {
+            // Map your enum to Auth0 role ID
+            switch (role)
+            {
+                case UserRole.Admin:
+                    return "rol_wWuM2wqzpt3m2bw7";
+                case UserRole.Member:
+                    return "rol_wUY0TxFsacB4iyex";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(role), role, null);
+            }
+        }
         /// <summary>
         /// Gets all users. Only accessible to admins.
         /// </summary>
@@ -56,13 +86,14 @@ namespace SecureTamSimulator.Api.Controllers
         /// <returns>The user with the specified ID.</returns>
         [HttpGet("{id}")]
         [Authorize(Policy = PolicyRoles.Member)]
-        public async Task<User> GetUserById(string id)
+        public async Task<User> GetUserById(Guid id)
         {
-            var user = await userService.GetUserByIdAsync(Guid.Parse(id));
+            var user = await userService.GetUserByIdAsync(id);
             // Decrypt sensitive user data
-           
-            user.Address = encryptionService.Decrypt(user.Address);
-            user.Birthdate = encryptionService.Decrypt(user.Birthdate);
+            var encryptionKey = user.EncryptionKey;
+            var encryptionIV = user.EncryptionIV;
+            user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
+            user.Birthdate = encryptionService.Decrypt(user.Birthdate, encryptionKey, encryptionIV);
 
             return user;
         }
@@ -113,9 +144,11 @@ namespace SecureTamSimulator.Api.Controllers
             // Decrypt sensitive user data
             foreach (var user in users)
             {
-                user.FirstName = encryptionService.Decrypt(user.FirstName);
-                user.LastName = encryptionService.Decrypt(user.LastName);
-                user.Address = encryptionService.Decrypt(user.Address);
+                var encryptionKey = user.EncryptionKey;
+                var encryptionIV = user.EncryptionIV;
+                user.FirstName = encryptionService.Decrypt(user.FirstName, encryptionKey, encryptionIV);
+                user.LastName = encryptionService.Decrypt(user.LastName, encryptionKey, encryptionIV);
+                user.Address = encryptionService.Decrypt(user.Address, encryptionKey, encryptionIV);
             }
             return Ok(users);
         }

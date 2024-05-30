@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var domain = builder.Configuration["Auth0:Domain"];
 var audience = builder.Configuration["Auth0:Audience"];
-
+var managementToken = builder.Configuration["Auth0:ManagementApiToken"];
 builder.Services.AddControllers();
 
 builder.Services.AddAuthentication(options =>
@@ -54,11 +54,17 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new ScopeRequirement(PolicyScopes.WriteSignup)));
     options.AddPolicy(PolicyScopes.ReadsUserTermsContext, policy =>
         policy.Requirements.Add(new ScopeRequirement(PolicyScopes.ReadsUserTermsContext)));
+
     options.AddPolicy(PolicyRoles.Admin, policy =>
-        policy.Requirements.Add(new RoleRequirement(new[] { Role.Admin })));
+        policy.Requirements.Add(new RoleRequirement(new[] { "Admin", "Member" })));
     options.AddPolicy(PolicyRoles.Member, policy =>
-        policy.Requirements.Add(new RoleRequirement(new[] { Role.Admin, Role.Member })));
+        policy.Requirements.Add(new RoleRequirement(new[] { "Member" })));
 });
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -69,8 +75,13 @@ builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.Configure<EncryptionSettings>(builder.Configuration.GetSection("EncryptionSettings"));
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-builder.Services.AddSingleton<IAuthorizationHandler, ScopeHandler>();
-builder.Services.AddSingleton<IAuthorizationHandler, RoleHandler>();
+
+// Register Auth0ManagementService with the IAuth0ManagementService interface
+builder.Services.AddSingleton<IAuth0ManagementService>(provider =>
+{
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new Auth0ManagementService();
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
