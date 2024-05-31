@@ -12,7 +12,6 @@ Thumbs.db
 **/*.suo
 **/*.sln.docstates
 .vscode/
-**/appsettings*.json
 
 # Ignore files for the frontend (Vue.js with TypeScript)
 node_modules/
