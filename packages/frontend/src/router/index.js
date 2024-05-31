@@ -5,9 +5,7 @@ import LoginPage from '../pages/LoginPage.vue';
 import UserProfilePage from '../pages/UserProfilePage.vue';
 import AdminPage from '../pages/AdminPage.vue';
 import NoAccessPage from '../pages/NoAccessPage.vue';
-
-import {  useAuth0 } from '@auth0/auth0-vue';
-
+import { useAuth0 } from '@auth0/auth0-vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -29,54 +27,47 @@ const router = createRouter({
       meta: {
         rolesRequired: ["Admin", "Member"]
       }
-
     },
     { 
       path: "/admin",
       component: AdminPage,
       name: "Admin",
-      meta:{
+      meta: {
         rolesRequired: ["Admin"]
       }
     },
-
-
     { 
       path: "/no-access",
       component: NoAccessPage,
       name: "NoAccess"
-    },
-  ],
+    }
+  ]
 });
 
-router.beforeEach(async (to) =>{
+router.beforeEach(async (to, from, next) => {
+  const { isAuthenticated, user } = useAuth0();
 
-  if(!useAuth0().isAuthenticated.value && to.name !== 'Login'){
+  if (!isAuthenticated.value && to.name !== 'Login') {
     // redirect the user to the login page
-    return { name: 'Login' }
+    return next({ name: 'Login' });
   }
 
-
-
-  if((useAuth0().isAuthenticated.value && to.name == 'Login')){
-    return { name: 'HomePage' }
+  if (isAuthenticated.value && to.name === 'Login') {
+    return next({ name: 'HomePage' });
   }
 
-  // CHECK USER ROLES BEFORE CONTINUE
-    console.log(to)
-    var rolesRequired = to.meta?.rolesRequired
-    if(rolesRequired && rolesRequired?.length > 0){
-
-      var userRoles = useAuth0().user.value["http://localhost:8082/roles"]
-      var hasRequiredRoles = rolesRequired.every(x => userRoles.includes(x))
-
-      if(!hasRequiredRoles)
-        return { name: 'HomePage' }
+  // Check user roles before continuing
+  const rolesRequired = to.meta?.rolesRequired;
+  if (rolesRequired && rolesRequired.length > 0) {
+    const userRoles = user.value["http://localhost:8082/roles"];
+    const hasRequiredRole = rolesRequired.some(role => userRoles.includes(role));
+    
+    if (!hasRequiredRole) {
+      return next({ name: 'HomePage' });
     }
+  }
 
-
-})
-
-
+  next();
+});
 
 export default router;

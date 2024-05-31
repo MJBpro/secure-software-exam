@@ -3,7 +3,6 @@
 
 <div class="w-[32rem] bg-slate-200 rounded p-6">
         <h1 class="text-2xl my-3 font-medium">Hello, please insert your information here</h1>
-
         <div class="flex gap-4 text-left flex-col p-4">
 
             <div>

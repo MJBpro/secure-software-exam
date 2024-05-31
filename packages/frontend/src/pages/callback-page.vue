@@ -21,7 +21,6 @@ export default {
         try {
           const token = await getAccessTokenSilently();
           localStorage.setItem('access_token', token);
-          console.log('dawdawd', token)
           router.push('/');
         } catch (error) {
           console.error('Error getting access token:', error);
