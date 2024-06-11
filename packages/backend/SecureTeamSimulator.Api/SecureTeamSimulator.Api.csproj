@@ -22,10 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Middelware\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SecureTeamSimulator.Application\SecureTeamSimulator.Application.csproj" />
       <ProjectReference Include="..\SecureTeamSimulator.Infrastructure\SecureTeamSimulator.Infrastructure.csproj" />
     </ItemGroup>
